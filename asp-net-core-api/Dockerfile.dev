@@ -1,0 +1,11 @@
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+
+ENV DOTNET_USE_POLLING_FILE_WATCHER 1
+ENV PROJECT_NAME=api
+
+WORKDIR /app
+COPY . .
+
+WORKDIR /app/asp-net-core-api
+
+ENTRYPOINT dotnet watch run  --urls=http://+:5000 --project asp-net-core-api.csproj

@@ -1,0 +1,9 @@
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+
+ENV DOTNET_USE_POLLING_FILE_WATCHER 1
+ENV PROJECT_NAME=web
+
+WORKDIR /app
+COPY . .
+WORKDIR /app/asp-net-core-web
+ENTRYPOINT dotnet watch run  --urls=http://+:5001 --project asp-net-core-web.csproj

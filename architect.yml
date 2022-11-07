@@ -1,0 +1,126 @@
+name: asp-net-core
+
+description: |
+  Example component for ASP.NET core
+
+homepage: https://github.com/architect-templates/asp-net-core
+
+keywords:
+  - dotnet
+  - ASP
+
+# Add secrets to be used by different services. For more information:
+# https://docs.architect.io/deployments/secrets/
+secrets:
+  postgres_username:
+    default: postgres
+    description: The username for the postgres database
+  postgres_password:
+    default: warning-override-for-production
+    description: The password for the postgres database
+  database_name:
+    default: movies
+    description: The username for the postgres database
+
+# Below are the configured services for the ASP.net component. The actual ASP.net
+# services are defined below as app and api.
+# For more info - https://docs.architect.io/components/services/
+services:
+  # A postgres database that will store our movie ratings
+  db:
+    # The docker image to use for the database
+    image: postgres:14
+    # Interfaces allow other services or ingresses to connect to this service
+    # This do not modify the way the image works. This only helps services communicate.
+    interfaces:
+      main:
+        # The default postgres port
+        port: 5432
+        # The username for the postgres database
+        username: ${{ secrets.postgres_username }}
+        # The password for the postgress database
+        password: ${{ secrets.postgres_password }}
+    # Set environemnt variables to configure the postgres docker container
+    environment:
+      POSTGRES_DB: ${{ secrets.database_name }}
+      POSTGRES_USER: ${{ secrets.postgres_username }}
+      POSTGRES_PASSWORD: ${{ secrets.postgres_password }}
+
+  ### This service is web server for the project
+  app:
+    # Make sure that the api has spun up before this one
+    depends_on:
+      - api
+    # Build context is the location of your application relative to the architect.yml file
+    build:
+      dockerfile: ./asp-net-core-web/Dockerfile
+    environment:
+      # Since the network request is made inside the users web browser, we need
+      # a domain name that it can reach. So we use an ingress. https://docs.architect.io/components/ingress-rules/
+      API_URL: ${{ ingresses.api.url }}
+    # Main interface port used to help define the url in the `interfaces` block on line 117
+    interfaces:
+      main: 5001
+    # Liveness probes can determine if your service is still starting or has become unhealthy
+    # No traffic will be routed to a service that has a failing liveness probe. https://docs.architect.io/components/services/#liveness_probe
+    liveness_probe:
+      command: curl --fail localhost:5001
+    # Debug blocks let us use logic that only applies when we run `architect dev`
+    # This is ignored when `architect register/deploy` are used https://docs.architect.io/getting-started/best-practices/#debug-volumes
+    debug:
+      build:
+        dockerfile: ./asp-net-core-web/Dockerfile.dev
+      volumes:
+        src:
+          # The `WORKDIR` defined in the Dockerfile (/app)
+          mount_path: /app
+          # Path to source code relative to the architect.yml file
+          host_path: ./
+
+  ### This service is the api server for the project
+  api:
+    # Make sure that the DB has spun up before this one
+    depends_on:
+      - db
+    # Build context is the location of your application relative to the architect.yml file
+    build:
+      dockerfile: ./asp-net-core-api/Dockerfile
+    # Main interface port used to help define the url in the `interfaces` block on line 122
+    interfaces:
+      main: 5000
+    liveness_probe:
+      command: curl --fail localhost:5000/movie
+    # Setup enviornment variables to be used by the application
+    environment:
+      DB_CONNECTION_HOST: ${{ services.db.interfaces.main.host }}:${{ services.db.interfaces.main.port }}
+      # Go to the db service and find the interface labeled main. Then take the value of username
+      # and set it to DB_CONNECTION_USERNAME
+      DB_CONNECTION_USERNAME: ${{ services.db.interfaces.main.username }}
+      DB_CONNECTION_PASSWORD: ${{ services.db.interfaces.main.password }}
+      DB_CONNECTION_DATABASE: ${{ secrets.database_name }}
+    # Debug blocks let us use logic that only applies when we run `architect dev`
+    # This is ignored when `architect register/deploy` are used https://docs.architect.io/getting-started/best-practices/#debug-volumes
+    debug:
+      build:
+        dockerfile: ./asp-net-core-api/Dockerfile.dev
+      volumes:
+        src:
+          # The `WORKDIR` defined in the Dockerfile (/app)
+          mount_path: /app
+          # Path to source code relative to the architect.yml file
+          host_path: ./
+
+# interfaces are used to expose our application to the gateway, allowing
+#   other services and dependencies to connect to one another.
+#   For more info - https://docs.architect.io/components/interfaces/
+interfaces:
+  # Interface for our Application
+  app:
+    url: ${{ services.app.interfaces.main.url }}
+    ingress:
+      subdomain: app
+  # Interface for our API layer
+  api:
+    url: ${{ services.api.interfaces.main.url }}
+    ingress:
+      subdomain: api

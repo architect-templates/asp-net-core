@@ -57,72 +57,13 @@ You can then [deploy the application](https://docs.architect.io/getting-started/
 $ architect deploy architect.yml -e example-environment
 ```
 
----
-# Additional Learning
-After you feel comfortable deploying a component with Architect, feel free to check out the powerful features we've added into this component.
+# Architecture
 
-Additional features within this component:
-* [Adding a dependency](#adding-a-dependency)
+## asp-net-core-shared
+This is a shared library between the other two libraries. This allows you to share code, but most importantly models. C# is a statically typed language. So we should make sure to embrace that when possible. If you look inside the Model folder you will see a class called `Movie`. This allows us to make sure that anytime we send a movie to the API from the Web or vice versa, that the object conforms to the correct contract.
 
+## asp-net-core-api
+This is our API layer that handles actions taken by the user. At the moment it just handles the creation and querying of movies, but you can expand on it by adding your own controllers. Take a look at the ASP documentation for help. [Getting Started Guide](https://learn.microsoft.com/en-us/aspnet/core/tutorials/min-web-api?view=aspnetcore-6.0&tabs=visual-studio)
 
-# Adding a dependency
-Using a microservice framework allows you to decouple an application and
-eleviate many of the problems that come with a monolithic architecture. Architect provides first class support for microservce architecture through the use of
-dependencies.
-
-This example application is configured to connect to the [Node.js Starter Project](https://github.com/architect-templates/node-rest-api)
-REST API for its backend as a [dependency](https://docs.architect.io/components/dependencies/), but you can modify the `architect.yml` file to connect to any REST API backend that has been registered to your account as an
-Architect Component.
-
-We also leverage Architect's [service referencing syntax](https://docs.architect.io/components/service-discovery/#service-referencing-syntax) to populate network information, which allows Architect to seamlessly promote this stack from local dev all the way through to production!
-
-## Registering Dependencies
-Since this application uses the [Node.js Starter Project](https://github.com/architect-templates/node-rest-api) as an external
-dependency, packaged into an independent Architect Component, you will need to clone that repository as well as this repository.
-Dependencies allow you to package the parts of your application stack independently rather than declaring them as services
-within the same `architect.yml` file, allowing
-reuse of your components.
-
-Once you have cloned the Node.js Starter Project, you will need to use the [`link` command](https://docs.architect.io/deployments/local-environments/#local-registration)
-before starting the React application locally. This command tells Architect to look for the source code for this dependency locally rather than pulling
-down a Component that has been registered in Architect Cloud.
-```sh
-# Clone the Node.js Starter Project repository,
-# Navigate to the repository's top-level directory, and link the project
-$ git clone git@github.com:architect-templates/node-rest-api.git
-$ cd ./node-rest-api
-$ architect link .
-$ cd ../
-```
-
-After linking, we'll need to bring back some of the commented-out pieces in both the `architect.yml` file and the application itself.
-
-### Update the architect.yml file
-
-In the `architect.yml`, uncomment lines 14 and 15. These lines let Architect know
-that the `react` component depends on the `node-rest-api`. Additionally, it tells
-Architect to use the latest linked version available with the `latest` tag.
-
-```yml
-dependencies:
-  node-rest-api: latest
-```
-
-After that, pop down to line 35 to uncomment `REACT_APP_API_ADDR` and save the file.
-This environment variable will provide the address for the React App to communicate with the API backend. Everything inside of `${{}}` is part of the [service referencing syntax](https://docs.architect.io/components/service-discovery/#service-referencing-syntax).
-```yml
-environment:
-  REACT_APP_API_ADDR: ${{ dependencies['node-rest-api'].ingresses.api.url }}
-```
-
-### Update the application
-Finally, navigate to `/src/App.js` and uncomment lines 4 and 11 to bring in
-the ItemForm component and save the file.. This will bring in a form to input your favorite movies,
-which will then display in a table below.
-
-## Relaunch the component
-Now that we've added our dependency, we can relaunch the component. If you haven't
-already stopped your app, do so by hitting `Ctrl-C`. Then run:
-```sh
-$ architect dev .
-```
+## asp-net-core-web
+Our frontend interface that our users interact with directly. This is where all your frontend code goes. While we have chosen to keep things simple, you can feel free to add any additional webframeworks you want on top of this. Check out [Bootstrap](https://aspnetcore.readthedocs.io/en/stable/client-side/bootstrap.html).

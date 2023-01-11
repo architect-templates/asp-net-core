@@ -57,10 +57,15 @@ services:
     environment:
       # Since the network request is made inside the users web browser, we need
       # a domain name that it can reach. So we use an ingress. https://docs.architect.io/components/ingress-rules/
-      API_URL: ${{ ingresses.api.url }}
-    # Main interface port used to help define the url in the `interfaces` block on line 117
+      API_URL: ${{ services.api.interfaces.main.ingress.url }}
+    # interfaces are used to expose our application to the gateway, allowing
+    #   other services and dependencies to connect to one another.
+    #   For more info - https://docs.architect.io/components/interfaces/
     interfaces:
-      main: 5001
+      main:
+        port: 5001
+        ingress:
+          subdomain: app
     # Liveness probes can determine if your service is still starting or has become unhealthy
     # No traffic will be routed to a service that has a failing liveness probe. https://docs.architect.io/components/services/#liveness_probe
     liveness_probe:
@@ -85,9 +90,12 @@ services:
     # Build context is the location of your application relative to the architect.yml file
     build:
       dockerfile: ./asp-net-core-api/Dockerfile
-    # Main interface port used to help define the url in the `interfaces` block on line 122
+    # Main interface port used to help define the url
     interfaces:
-      main: 5000
+      main:
+        port: 5000
+        ingress:
+          subdomain: api
     liveness_probe:
       command: curl --fail localhost:5000/movie
     # Setup enviornment variables to be used by the application
@@ -109,18 +117,3 @@ services:
           mount_path: /app
           # Path to source code relative to the architect.yml file
           host_path: ./
-
-# interfaces are used to expose our application to the gateway, allowing
-#   other services and dependencies to connect to one another.
-#   For more info - https://docs.architect.io/components/interfaces/
-interfaces:
-  # Interface for our Application
-  app:
-    url: ${{ services.app.interfaces.main.url }}
-    ingress:
-      subdomain: app
-  # Interface for our API layer
-  api:
-    url: ${{ services.api.interfaces.main.url }}
-    ingress:
-      subdomain: api

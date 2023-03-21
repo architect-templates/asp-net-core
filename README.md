@@ -19,7 +19,7 @@
 ---
 
 
-# Go Starter Project
+# ASP.net Core Starter Project
 
 This project is an example application written in [ASP.net](https://dotnet.microsoft.com/en-us/apps/aspnet) with a [Postgres](https://www.postgresql.org/) database backend packaged into an Architect component.
 

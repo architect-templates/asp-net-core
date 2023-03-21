@@ -29,6 +29,10 @@ namespace asp_net_core_web.Pages
             });
             await httpClient.PostAsync("/movie", content);
             await OnGet();
+            // Added so that after a post it redirects back to the page
+            // This allows the page to be refreshed without the form being
+            // submitted
+            Response.Redirect("/");
         }
 
         public async Task OnGet()

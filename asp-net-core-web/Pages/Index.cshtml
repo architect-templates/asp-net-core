@@ -54,22 +54,26 @@
         </div>
     </form>
 
-    <table class="table table-striped table-bordered">
-        <thead>
-        <tr>
-            <th>Name</th>
-            <th>Rating</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var movie in Model.MovieList)
-        {
+    @if (Model.MovieList.Count() != 0) {
+        <table class="table table-striped table-bordered">
+            <thead>
             <tr>
-                <td>@movie.Name</td>
-                <td>@movie.Rating</td>
+                <th>Name</th>
+                <th>Rating</th>
             </tr>
-        }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+            @foreach (var movie in Model.MovieList)
+            {
+                <tr>
+                    <td>@movie.Name</td>
+                    <td>@movie.Rating</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    } else {
+        <p>No movies found</p>
+    }
 
 </div>

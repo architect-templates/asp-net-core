@@ -40,6 +40,10 @@ services:
         username: ${{ secrets.postgres_username }}
         # The password for the postgress database
         password: ${{ secrets.postgres_password }}
+    liveness_probe:
+      command: pg_isready -d ${{ secrets.database_name }} -U ${{ secrets.postgres_username }}
+      interval: 10s
+      failure_threshold: 3
     # Set environemnt variables to configure the postgres docker container
     environment:
       POSTGRES_DB: ${{ secrets.database_name }}

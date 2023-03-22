@@ -13,19 +13,7 @@ namespace asp_net_core_api.Contexts
             public MovieContext(DbContextOptions<MovieContext> options)
                 : base(options)
             {
-                
-            }
-            
-            protected override void OnModelCreating(ModelBuilder modelBuilder)
-            {
-                base.OnModelCreating(modelBuilder);
-                
-                modelBuilder.Entity<Movie>().HasData(new Movie
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    Name = "The Prestige",
-                    Rating = 10
-                });
+
             }
     }
 }

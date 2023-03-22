@@ -35,14 +35,6 @@ namespace asp_net_core_web.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Movies");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "952e3479-7cf0-484b-8e90-35f2b4b63974",
-                            Name = "The Prestige",
-                            Rating = 10
-                        });
                 });
 #pragma warning restore 612, 618
         }

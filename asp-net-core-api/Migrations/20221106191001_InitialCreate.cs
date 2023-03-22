@@ -20,11 +20,6 @@ namespace asp_net_core_web.Migrations
                 {
                     table.PrimaryKey("PK_Movies", x => x.Id);
                 });
-
-            migrationBuilder.InsertData(
-                table: "Movies",
-                columns: new[] { "Id", "Name", "Rating" },
-                values: new object[] { "952e3479-7cf0-484b-8e90-35f2b4b63974", "The Prestige", 10 });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
